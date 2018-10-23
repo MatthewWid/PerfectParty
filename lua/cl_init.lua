@@ -1,17 +1,4 @@
-local party_config = {
-	listBackground = true,
-	playerBox = {
-		width = 200,
-		height = 60,
-		padding = 10,
-		spacing = 5,
-		offsetLeft = 50,
-		offsetTop = 20,
-		bgDefault = Color(250, 250, 250),
-		statsBg = Color(160, 160, 160),
-		statsDrawText = true
-	}
-};
+include("shared.lua");
 
 surface.CreateFont("NameFont", {
 	size = 20,
@@ -28,15 +15,15 @@ surface.CreateFont("PartyNameFont", {
 	antialias = true
 });
 
-local width = party_config.playerBox.width;
-local height = party_config.playerBox.height;
-local padding = party_config.playerBox.padding;
-local spacing = party_config.playerBox.spacing;
-local offsetLeft = party_config.playerBox.offsetLeft;
-local offsetTop = party_config.playerBox.offsetTop;
-local bgDefault = party_config.playerBox.bgDefault;
-local statsBg = party_config.playerBox.statsBg;
-local statsDrawText = party_config.playerBox.statsDrawText;
+local width = pConfig.playerList.width;
+local height = pConfig.playerList.height;
+local padding = pConfig.playerList.padding;
+local spacing = pConfig.playerList.spacing;
+local offsetLeft = pConfig.playerList.offsetLeft;
+local offsetTop = pConfig.playerList.offsetTop;
+local bgDefault = pConfig.playerList.bgDefault;
+local statsBg = pConfig.playerList.statsBg;
+local statsDrawText = pConfig.playerList.statsDrawText;
 function drawPlayerInfo(x, y, bgColor, plyName, healthPerc, healthWidth, armourPerc, armourWidth)
 	local paddingRealTop = y + padding / 2;
 
@@ -138,7 +125,7 @@ function calcPlayerInfo(ply, i)
 end
 
 hook.Add("HUDPaint", "Draw Party List", function()
-	if (party_config.listBackground) then
+	if (pConfig.playerList.listBackground) then
 		draw.RoundedBox(
 			0,
 			offsetLeft - 5,

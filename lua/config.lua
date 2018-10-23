@@ -1,3 +1,0 @@
-pConfig = {
-	maxPartySize = 4
-};
