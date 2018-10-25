@@ -152,8 +152,11 @@ hook.Add("HUDPaint", "Draw Party List", function()
 	end
 end);
 
-net.Receive("PartyInfo", function(len)
+net.Receive("PartyInfo", function()
 	CurrentParty.exists = true;
 	CurrentParty.name = net.ReadString();
 	CurrentParty.members = net.ReadTable();
+end);
+net.Receive("PartyLeave", function()
+	CurrentParty.exists = false;
 end);

@@ -1,6 +1,7 @@
 include("shared.lua");
 
 util.AddNetworkString("PartyInfo");
+util.AddNetworkString("PartyLeave");
 
 -- DEBUG: Initially clear all players' parties if they exist
 for _, v in pairs(player.GetAll()) do
@@ -102,8 +103,14 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 			wasCommand = true;
 			return "";
 		end
+		if ply.CurrentParty.leader == ply then
+			ply:ChatPrint("You cannot leave a party you are the leader of. Use '!pdisband' to disband your entire party.");
+			return "";
+		end
 
 		ply.CurrentParty:RemovePlayer(ply, true);
+		net.Start("PartyLeave");
+		net.Send(ply);
 	end
 
 	if isCommand(text, "ppromote") then
@@ -182,6 +189,7 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 	if wasCommand then return ""; end;
 end);
 
+// Party data is transmitted ten times a second instead of sixty
 timer.Create("SendPartyInfo", .1, 0, function()
 	for _, v in pairs(player.GetAll()) do
 		if v.CurrentParty then
