@@ -40,7 +40,7 @@ function Party:AddPlayer(ply, notify)
 	ply.CurrentParty = self;
 
 	if (notify) then
-		ply:ChatPrint("You have the joined the '" .. self.name .. "' party!");
+		ply:ChatPrint("You have joined the '" .. self.name .. "' party!");
 	end
 end
 function Party:RemovePlayer(ply, notify)
@@ -73,6 +73,20 @@ function Party:PlayerIsInvited(ply)
 
 	return false;
 end
+function Party:FindMember(pName)
+	PrintTable(self.members);
+	print(string.find("mob", pName:lower()));
+	for _, v in pairs(self.members) do
+		print(v:Nick():lower());
+		print(pName:lower());
+		print(string.find(v:Nick():lower(), pName:lower()));
+		if (string.find(v:Nick():lower(), pName:lower())) then
+			return v;
+		end
+	end
+
+	return false;
+end
 
 -- Chat command inputs --
 function isCommand(text, command)
@@ -90,6 +104,7 @@ function findPlayer(pName)
 	return false;
 end
 hook.Add("PlayerSay", "Party Commands", function(ply, text)
+	print(text);
 	local wasCommand = false;
 	if isCommand(text, "pcreate") then
 		wasCommand = true;
@@ -113,7 +128,7 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 		net.Send(ply);
 	end
 
-	if isCommand(text, "ppromote") then
+	if isCommand(text, "pkick") then
 		wasCommand = true;
 		if not ply.CurrentParty then
 			ply:ChatPrint("You are not in a party.");
@@ -131,6 +146,27 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 		end
 		if not ply.CurrentParty:PlayerIsMember(playerToAdd) then
 			ply:ChatPrint(playerToAdd:Nick() .. " is not in your party.");
+			return "";
+		end
+	end
+
+	if isCommand(text, "ppromote") then
+		wasCommand = true;
+		if not ply.CurrentParty then
+			ply:ChatPrint("You are not in a party.");
+			return "";
+		end
+		if not ply.CurrentParty.leader == ply then
+			ply:ChatPrint("You are not the party leader.");
+			return "";
+		end
+
+		local pName = string.sub(text, 11);
+		local playerToAdd = ply.CurrentParty:FindMember(pName);
+		print(pName);
+		print(playerToAdd);
+		if not playerToAdd then
+			ply:ChatPrint(pName .. " is not in your party.");
 			return "";
 		end
 
@@ -201,10 +237,10 @@ timer.Create("SendPartyInfo", .1, 0, function()
 	end
 end);
 
-
 player.GetAll()[2]:Say("!pcreate The Mobsters");
 timer.Simple(1, function()
 	AllParties[1]:AddPlayer(player.GetAll()[1], true);
 
 	player.GetAll()[2]:Say("!ppromote Mob");
+	player.GetAll()[1]:Say('space');
 end);
