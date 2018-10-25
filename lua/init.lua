@@ -1,4 +1,4 @@
-include("config.lua");
+include("shared.lua");
 
 -- List of all parties --
 local AllParties = {};
