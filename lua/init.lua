@@ -1,5 +1,12 @@
 include("shared.lua");
 
+util.AddNetworkString("PartyInfo");
+
+-- DEBUG: Initially clear all players' parties if they exist
+for _, v in pairs(player.GetAll()) do
+	v.CurrentParty = nil;
+end
+
 -- List of all parties --
 local AllParties = {};
 
@@ -173,6 +180,17 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 	end
 
 	if wasCommand then return ""; end;
+end);
+
+timer.Create("SendPartyInfo", .1, 0, function()
+	for _, v in pairs(player.GetAll()) do
+		if v.CurrentParty then
+			net.Start("PartyInfo");
+				net.WriteString(v.CurrentParty.name);
+				net.WriteTable(v.CurrentParty.members);
+			net.Send(v);
+		end
+	end
 end);
 
 

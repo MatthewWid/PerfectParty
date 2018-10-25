@@ -124,22 +124,36 @@ function calcPlayerInfo(ply, i)
 	);
 end
 
+local CurrentParty = {
+	exists = false,
+	name = nil,
+	members = nil
+};
+
 hook.Add("HUDPaint", "Draw Party List", function()
-	if (pConfig.playerList.listBackground) then
-		draw.RoundedBox(
-			0,
-			offsetLeft - 5,
-			offsetTop - 15,
-			width + 10,
-			30 + 10 + (#player.GetAll() * (height + spacing)),
-			Color(0, 0, 0, 180)
-		);
-	end
+	if CurrentParty.exists then
+		if (pConfig.playerList.listBackground) then
+			draw.RoundedBox(
+				0,
+				offsetLeft - 5,
+				offsetTop - 15,
+				width + 10,
+				30 + 10 + (#CurrentParty.members * (height + spacing)),
+				Color(0, 0, 0, 180)
+			);
+		end
 
-	draw.RoundedBox(0, offsetLeft, offsetTop - 10, width, 30, Color(255, 250, 250));
-	draw.SimpleText("The Mobsters", "PartyNameFont", offsetLeft + padding, offsetTop + padding / 2, Color(10, 10, 10), nil, TEXT_ALIGN_CENTER);
+		draw.RoundedBox(0, offsetLeft, offsetTop - 10, width, 30, Color(255, 250, 250));
+		draw.SimpleText(CurrentParty.name, "PartyNameFont", offsetLeft + padding, offsetTop + padding / 2, Color(10, 10, 10), nil, TEXT_ALIGN_CENTER);
 
-	for k, v in pairs(player.GetAll()) do
-		calcPlayerInfo(v, k);
+		for k, v in pairs(CurrentParty.members) do
+			calcPlayerInfo(v, k);
+		end
 	end
+end);
+
+net.Receive("PartyInfo", function(len)
+	CurrentParty.exists = true;
+	CurrentParty.name = net.ReadString();
+	CurrentParty.members = net.ReadTable();
 end);
