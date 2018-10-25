@@ -152,13 +152,33 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 		ply:ChatPrint("You renamed the party to '" .. ply.CurrentParty.name .. "'.");
 	end
 
+	if (isCommand(text, "pinfo")) then
+		wasCommand = true;
+		if not ply.CurrentParty then
+			ply:ChatPrint("You are not in a party.");
+			return "";
+		end
+
+		local playerList = "";
+		for k, v in pairs(ply.CurrentParty.members) do
+			playerList = (
+				playerList
+				.. ((v == ply.CurrentParty.leader) and "[Leader] " or "")
+				.. v:Nick()
+				.. ((k ~= #ply.CurrentParty.members) and ", " or "")
+			);
+		end
+
+		ply:ChatPrint("Your party '" .. ply.CurrentParty.name .. "': " .. playerList);
+	end
+
 	if wasCommand then return ""; end;
 end);
 
 
--- player.GetAll()[2]:Say("!pcreate The Mobsters");
--- timer.Simple(1, function()
--- 	AllParties[1]:AddPlayer(player.GetAll()[1], true);
+player.GetAll()[2]:Say("!pcreate The Mobsters");
+timer.Simple(1, function()
+	AllParties[1]:AddPlayer(player.GetAll()[1], true);
 
--- 	player.GetAll()[2]:Say("!ppromote Mob");
--- end);
+	player.GetAll()[2]:Say("!ppromote Mob");
+end);
