@@ -1,4 +1,5 @@
 pConfig = {
+	prefix = "!",
 	maxPartySize = 4,
 	playerList = {
 		listBackground = true,

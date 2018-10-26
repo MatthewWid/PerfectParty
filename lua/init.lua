@@ -95,7 +95,7 @@ end
 
 -- Chat command inputs --
 function isCommand(text, command)
-	return string.Split(text, " ")[1]:sub(2):lower() == command:lower();
+	return string.sub(text, 1, 1) == pConfig.prefix and string.Split(text, " ")[1]:sub(2):lower() == command:lower();
 end
 function findPlayer(pName)
 	local plys = player.GetAll();
