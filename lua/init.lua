@@ -23,6 +23,10 @@ function Party:New(name, creator)
 	self.members = {};
 	self.invited = {};
 
+	self.settings = {
+		friendlyFire = true,
+		headIndicator = true
+	};
 	self.friendlyFire = true;
 	self.highlightInWorld = true;
 
@@ -113,6 +117,10 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 	local wasCommand = false;
 	if isCommand(text, "pcreate") then
 		wasCommand = true;
+		if ply.CurrentParty then
+			ply:ChatPrint("You are already in a party.");
+			return "";
+		end
 		Party:New(string.sub(text, 10), ply);
 	end
 
@@ -120,7 +128,6 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 		wasCommand = true;
 		if not ply.CurrentParty then
 			ply:ChatPrint("You are not in a party.");
-			wasCommand = true;
 			return "";
 		end
 		if ply.CurrentParty.leader == ply then
@@ -180,6 +187,7 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 				ply.CurrentParty:RemovePlayer(v);
 			end
 		end
+		-- Remove the leader last so we can keep track of the party
 		ply.CurrentParty:RemovePlayer(ply);
 	end
 
