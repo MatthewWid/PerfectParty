@@ -10,6 +10,9 @@ end
 
 -- List of all parties --
 local AllParties = {};
+function partyDelete(party)
+	--
+end
 
 -- Party object definitions --
 local Party = {};
@@ -44,10 +47,13 @@ function Party:AddPlayer(ply, notify)
 	end
 end
 function Party:RemovePlayer(ply, notify)
+	print(ply);
 	for k, v in pairs(self.members) do
 		if (v == ply) then
 			table.remove(self.members, k);
 			ply.CurrentParty = nil;
+			net.Start("PartyLeave");
+			net.Send(ply);
 		end
 	end
 
@@ -74,12 +80,7 @@ function Party:PlayerIsInvited(ply)
 	return false;
 end
 function Party:FindMember(pName)
-	PrintTable(self.members);
-	print(string.find("mob", pName:lower()));
 	for _, v in pairs(self.members) do
-		print(v:Nick():lower());
-		print(pName:lower());
-		print(string.find(v:Nick():lower(), pName:lower()));
 		if (string.find(v:Nick():lower(), pName:lower())) then
 			return v;
 		end
@@ -104,7 +105,11 @@ function findPlayer(pName)
 	return false;
 end
 hook.Add("PlayerSay", "Party Commands", function(ply, text)
-	print(text);
+	-- DEBUG: Remove extra space sent with bot messages.
+	if ply:IsBot() then
+		text = string.sub(text, 1, #text - 1);
+	end
+
 	local wasCommand = false;
 	if isCommand(text, "pcreate") then
 		wasCommand = true;
@@ -123,9 +128,10 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 			return "";
 		end
 
+		for _, v in pairs(ply.CurrentParty.members) do
+			v:ChatPrint(ply:Nick() .. " has left the party.");
+		end
 		ply.CurrentParty:RemovePlayer(ply, true);
-		net.Start("PartyLeave");
-		net.Send(ply);
 	end
 
 	if isCommand(text, "pkick") then
@@ -139,15 +145,42 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 			return "";
 		end
 
-		local playerToAdd = findPlayer(string.Split(text, " ")[2]);
-		if not playerToAdd then
-			ply:ChatPrint("Player not found.");
+		local playerToKick = ply.CurrentParty:FindMember(string.Split(text, " ")[2]);
+		if ply == playerToKick then
+			ply:ChatPrint("You cannot kick yourself.");
 			return "";
 		end
-		if not ply.CurrentParty:PlayerIsMember(playerToAdd) then
-			ply:ChatPrint(playerToAdd:Nick() .. " is not in your party.");
+		if not playerToKick then
+			ply:ChatPrint(pName .. " is not in your party.");
 			return "";
 		end
+
+		ply.CurrentParty:RemovePlayer(playerToKick, true);
+		for _, v in pairs(ply.CurrentParty.members) do
+			v:ChatPrint(playerToKick:Nick() .. " has been kicked from the party.");
+		end
+		net.Start("PartyLeave");
+		net.Send(playerToKick);
+	end
+
+	if isCommand(text, "pdisband") then
+		wasCommand = true;
+		if not ply.CurrentParty then
+			ply:ChatPrint("You are not in a party.");
+			return "";
+		end
+		if not ply.CurrentParty.leader == ply then
+			ply:ChatPrint("You are not the party leader.");
+			return "";
+		end
+
+		for _, v in pairs(ply.CurrentParty.members) do
+			v:ChatPrint("Your party has been disbanded.");
+			if v ~= ply then
+				ply.CurrentParty:RemovePlayer(v);
+			end
+		end
+		ply.CurrentParty:RemovePlayer(ply);
 	end
 
 	if isCommand(text, "ppromote") then
@@ -162,9 +195,8 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 		end
 
 		local pName = string.sub(text, 11);
+
 		local playerToAdd = ply.CurrentParty:FindMember(pName);
-		print(pName);
-		print(playerToAdd);
 		if not playerToAdd then
 			ply:ChatPrint(pName .. " is not in your party.");
 			return "";
@@ -222,7 +254,7 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 		ply:ChatPrint("Your party '" .. ply.CurrentParty.name .. "': " .. playerList);
 	end
 
-	if wasCommand then return ""; end;
+	if wasCommand then return ""; end
 end);
 
 // Party data is transmitted ten times a second instead of sixty
@@ -241,6 +273,11 @@ player.GetAll()[2]:Say("!pcreate The Mobsters");
 timer.Simple(1, function()
 	AllParties[1]:AddPlayer(player.GetAll()[1], true);
 
-	player.GetAll()[2]:Say("!ppromote Mob");
-	player.GetAll()[1]:Say('space');
+	timer.Simple(1, function()
+		player.GetAll()[2]:Say("!pdisband");
+
+		-- timer.Simple(1, function()
+		-- 	player.GetAll()[2]:Say("!pleave");
+		-- end);
+	end);
 end);
