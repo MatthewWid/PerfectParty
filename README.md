@@ -2,7 +2,10 @@
 
 An addon for the game Garry's Mod that introduces a simple and easy to use partying system.
 
-Below is information about the **configuration**, **chat commands**, **party settings** and **installation**.
+<img src="https://i.imgur.com/u1lbTwu.png" align="left" height="240">
+<img src="https://i.imgur.com/i4G43Nr.png" height="240">
+
+Below is information about the **configuration**, **chat commands**, **party settings**,  **installation** and **licencing**.
 
 # Configuration
 
@@ -36,7 +39,7 @@ The configuration settings are stored in the `pConfig` variable in `/lua/shared.
 | `pleave` | | No | Leaves the currently joined party. Party leaders cannot directly leave. | `!pleave` |
 | `pkick` | `<Player Name>` | **Yes** | Kicks a target player from the party. | `!pkick Freddy101` |
 | `pinfo` | | No | Provides information in chat about your party name and its member list. | `!pinfo` |
-| `pset` | `<Setting Name> <Setting Value>` | **Yes** | Set the value of a party setting for your party.<br>See the *Party Settings* Section. | `!pset ff on` |
+| `pset` | `<Setting Name> <Setting Value>` | **Yes** | Set the value of a party setting for your party.<br>See the *Party Settings* section. | `!pset ff on` |
 
 # Party Settings
 
@@ -52,3 +55,7 @@ These are settings for each individual party that can be altered by the party's 
 1. Create a new folder in your `/addons/` directory in your server called `PerfectParty`.
 2. Create a new directory `/lua/autorun/` inside the newly created directory.
 3. Insert the contents of the `/lua/` folder in this directory into the `./autorun/` directory.
+
+# Licence
+
+This project uses the **Mozilla Public License 2.0**.
