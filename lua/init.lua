@@ -11,7 +11,13 @@ end
 -- List of all parties --
 local AllParties = {};
 function partyDelete(party)
-	--
+	for k, v in pairs(AllParties) do
+		if (v == party) then
+			table.remove(AllParties, k);
+		end
+	end
+
+	print("DELETED PARTY");
 end
 
 -- Party object definitions --
@@ -51,7 +57,6 @@ function Party:AddPlayer(ply, notify)
 	end
 end
 function Party:RemovePlayer(ply, notify)
-	print(ply);
 	for k, v in pairs(self.members) do
 		if (v == ply) then
 			table.remove(self.members, k);
@@ -188,6 +193,7 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 			end
 		end
 		-- Remove the leader last so we can keep track of the party
+		partyDelete(ply.CurrentParty);
 		ply.CurrentParty:RemovePlayer(ply);
 	end
 
