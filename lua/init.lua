@@ -3,7 +3,7 @@ include("shared.lua");
 util.AddNetworkString("PartyInfo");
 util.AddNetworkString("PartyLeave");
 
--- DEBUG: Initially clear all players' parties if they exist
+-- Initially clear all players' parties if they exist
 for _, v in pairs(player.GetAll()) do
 	v.CurrentParty = nil;
 	v.pInvites = nil;
@@ -397,21 +397,4 @@ timer.Create("SendPartyInfo", .1, 0, function()
 			net.Send(v);
 		end
 	end
-end);
-
--- DEBUG EXEC
--- lua_openscript c/p/PParty/lua/init.lua; lua_openscript_cl c/p/PParty/lua/cl_init.lua;
-
-player.GetAll()[2]:Say("!pcreate cool guys");
-timer.Simple(1, function()
-	player.GetAll()[2]:Say("!pinvite bob");
-	player.GetAll()[2]:Say("!pinvite joh");
-	player.GetAll()[2]:Say("!pinvite jdu");
-	player.GetAll()[2]:Say("!pinvite ang");
-
-	timer.Simple(1, function()
-		player.GetAll()[3]:Say("!paccept");
-		player.GetAll()[4]:Say("!paccept");
-		player.GetAll()[5]:Say("!paccept");
-	end);
 end);
