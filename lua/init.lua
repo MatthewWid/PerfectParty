@@ -362,7 +362,17 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 	if wasCommand then return ""; end
 end);
 
-// Party data is transmitted ten times a second instead of sixty
+hook.Add("PlayerShouldTakeDamage", "Prevent Party Friendly Fire", function(victim, attacker)
+	if victim.CurrentParty then
+		if victim.CurrentParty:PlayerIsMember(attacker) and not victim.CurrentParty.settings.friendlyFire then
+			return false;
+		end
+	end
+
+	return true;
+end);
+
+-- Party data is transmitted ten times a second instead of sixty
 timer.Create("SendPartyInfo", .1, 0, function()
 	for _, v in pairs(player.GetAll()) do
 		if v.CurrentParty then
