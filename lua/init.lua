@@ -6,6 +6,7 @@ util.AddNetworkString("PartyLeave");
 -- DEBUG: Initially clear all players' parties if they exist
 for _, v in pairs(player.GetAll()) do
 	v.CurrentParty = nil;
+	v.pInvites = nil;
 end
 
 -- List of all parties --
@@ -16,8 +17,6 @@ function partyDelete(party)
 			table.remove(AllParties, k);
 		end
 	end
-
-	print("DELETED PARTY");
 end
 
 -- Party object definitions --
@@ -27,14 +26,11 @@ function Party:New(name, creator)
 	self.name = name;
 	self.leader = creator or nil;
 	self.members = {};
-	self.invited = {};
 
 	self.settings = {
 		friendlyFire = true,
 		headIndicator = true
 	};
-	self.friendlyFire = true;
-	self.highlightInWorld = true;
 
 	table.insert(AllParties, self);
 
@@ -53,7 +49,7 @@ function Party:AddPlayer(ply, notify)
 	ply.CurrentParty = self;
 
 	if (notify) then
-		ply:ChatPrint("You have joined the '" .. self.name .. "' party!");
+		ply:ChatPrint("You have joined the '" .. self.name .. "' party.");
 	end
 end
 function Party:RemovePlayer(ply, notify)
@@ -231,6 +227,59 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 			ply:ChatPrint("You are not the party leader.");
 			return "";
 		end
+
+		local pName = string.sub(text, 10)
+		local playerToInvite = findPlayer(pName);
+
+		if not playerToInvite or not playerToInvite:IsPlayer() then
+			ply:ChatPrint("Player '" .. pName .. "' not found.");
+			return "";
+		end
+		if ply.CurrentParty:PlayerIsMember(playerToInvite) then
+			ply:ChatPrint(playerToInvite:Nick() .. " is already in your party.");
+			return "";
+		end
+		if playerToInvite.CurrentParty then
+			ply:ChatPrint(playerToInvite:Nick() .. " is already in a party.");
+			return "";
+		end
+
+		if playerToInvite.pInvites then
+			table.insert(playerToInvite.pInvites, ply.CurrentParty);
+		else
+			playerToInvite.pInvites = {ply.CurrentParty};
+		end
+		ply:ChatPrint("You invited " .. playerToInvite:Nick() .. " to the party.");
+		playerToInvite:ChatPrint("You have been invited by " .. ply:Nick() .. " to the party '" .. ply.CurrentParty.name .. "'.")
+	end
+
+	if isCommand(text, "paccept") then
+		wasCommand = true;
+		if ply.CurrentParty then
+			ply:ChatPrint("You must first leave your party to join another ('!pleave' or '!pdisband').");
+			return "";
+		end
+		if ply.pInvites and #ply.pInvites >= 1 then
+			ply.pInvites[1]:AddPlayer(ply, true);
+			table.remove(ply.pInvites, 1);
+
+			if ply.CurrentParty then
+				for _, v in pairs(ply.CurrentParty.members) do
+					if v ~= ply then
+						v:ChatPrint(ply:Nick() .. " has joined the party.");
+					end
+				end
+			end
+		end
+	end
+
+	if isCommand(text, "pdecline") then
+		wasCommand = true;
+		if ply.pInvites and #ply.pInvites >= 1 then
+			ply.pInvites[1].leader:ChatPrint(ply:Nick() .. " declined the party invite.");
+			ply:ChatPrint("You declined the invite to the party '" .. ply.pInvites[1].name .. "'.");
+			table.remove(ply.pInvites, 1);
+		end
 	end
 
 	if isCommand(text, "pname") then
@@ -285,10 +334,11 @@ end);
 
 player.GetAll()[2]:Say("!pcreate The Mobsters");
 timer.Simple(1, function()
-	AllParties[1]:AddPlayer(player.GetAll()[1], true);
+	-- player.GetAll()[2]:Say("!pdecline");
+	player.GetAll()[2]:Say("!pinvite Mob");
 
 	timer.Simple(1, function()
-		player.GetAll()[2]:Say("!pdisband");
+		-- player.GetAll()[2]:Say("!ppromote Mob");
 
 		-- timer.Simple(1, function()
 		-- 	player.GetAll()[2]:Say("!pleave");
