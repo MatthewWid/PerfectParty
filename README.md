@@ -13,33 +13,33 @@ The configuration settings are stored in the `pConfig` variable in `/lua/shared.
 
 | Settings Name | Default Value | Description |
 |-|-|-|
-| `prefix` | `!` | The prefix for chat commands. See the *Chat Commands* section. |
-| `maxPartySize` | `4` | The maximum amount of players allowed in any one party. |
+| `prefix` | `!` | Prefix for chat commands. See the *Chat Commands* section. |
+| `maxPartySize` | `4` | Maximum amount of players allowed in any one party. |
 | `listBackground` | `true` | On-screen party list dark background. |
-| `width` | `200` | The width of each players' information box. |
-| `height` | `60` | The height of each players' information box. |
-| `padding` | `10` | The padding (Inner margin) of each players' information box. |
-| `spacing` | `5` | The vertical spacing in-between each players' information box. |
-| `offsetLeft` | `50` | The x-axis offset of each players' information box. |
-| `offsetTop` | `20` | The y-axis offset of each players' information box. |
-| `bgDefault` | `Color(250, 250, 250)` | The background colour of each players' information box.<br>This changes to `Color(255, 160, 160)` when the player is dead. |
-| `statsBg` | `Color(160, 160, 160)` | The background colour of the bar *behind* the players' health and armour statbar. |
+| `width` | `200` | Width of each players' information box. |
+| `height` | `60` | Height of each players' information box. |
+| `padding` | `10` | Padding (Inner margin) of each players' information box. |
+| `spacing` | `5` | Vertical spacing in-between each players' information box. |
+| `offsetLeft` | `50` | X-axis offset of each players' information box. |
+| `offsetTop` | `20` | Y-axis offset of each players' information box. |
+| `bgDefault` | `Color(250, 250, 250)` | Background colour of each players' information box.<br>This changes to `Color(255, 160, 160)` when the player is dead. |
+| `statsBg` | `Color(160, 160, 160)` | Background colour of the bar *behind* the players' health and armour statbar. |
 | `statsDrawText` | `true` | Display the actual value of the players' health and armour as text over their respective statsbar. |
 
 # Chat Commands
 
 | Command | Parameters  | Requires leader? | Description | Example Usage |
 |-|-|:-:|-|-|
-| `pcreate` | `<Party Name>` | No | Create a party with the given name. | `!pcreate The Cool Mafia` |
-| `pname` | `<Party Name>` | **Yes** | Rename your current party. | `!pname The Cooler Mafia` |
-| `pdisband` | | **Yes** | Disband your current party. Makes everyone leave including yourself. | `!pdisband` |
+| `pcreate` | `<Party Name>` | No | Creates a party with the given name. | `!pcreate The Cool Mafia` |
+| `pname` | `<Party Name>` | **Yes** | Renames your current party. | `!pname The Cooler Mafia` |
+| `pdisband` | | **Yes** | Disbands your current party. Makes everyone leave including yourself. | `!pdisband` |
 | `pinvite` | `<Player Name>` | **Yes** | Sends a party invite to another player. | `!pinvite Freddy101` |
 | `paccept` | | No | Accepts the last sent party invitation.<br>(Invitations are queued. You can accept and decline in the order of receiving invitations). | `!paccept` |
 | `pdecline` | | No | Declines the last sent party invitation. | `!pdecline` |
 | `pleave` | | No | Leaves the currently joined party. Party leaders cannot directly leave. | `!pleave` |
 | `pkick` | `<Player Name>` | **Yes** | Kicks a target player from the party. | `!pkick Freddy101` |
 | `pinfo` | | No | Provides information in chat about your party name and its member list. | `!pinfo` |
-| `pset` | `<Setting Name> <Setting Value>` | **Yes** | Set the value of a party setting for your party.<br>See the *Party Settings* section. | `!pset ff on` |
+| `pset` | `<Setting Name> <Setting Value>` | **Yes** | Sets the value of a party setting for your party.<br>See the *Party Settings* section. | `!pset ff on` |
 
 # Party Settings
 
@@ -47,7 +47,7 @@ These are settings for each individual party that can be altered by the party's 
 
 | Name | Settings Name | Default Value | Description |
 |-|-|-|-|
-| Friendly Fire | `ff` or `friendlyfire` | `off` | Whether players of in the same party can damage eachother or not. |
+| Friendly Fire | `ff` or `friendlyfire` | `off` | Players of in the same party can damage eachother. |
 | Head Indicator | `hi` or `headindicator` | `on` | Display a small icon above fellow party members' heads to easily identify them. |
 
 # Installation
