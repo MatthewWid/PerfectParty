@@ -228,6 +228,11 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 			return "";
 		end
 
+		if #ply.CurrentParty.members >= pConfig.maxPartySize then
+			ply:ChatPrint("You have reached the maximum party size (" .. pConfig.maxPartySize .. ").");
+			return "";
+		end
+
 		local pName = string.sub(text, 10)
 		local playerToInvite = findPlayer(pName);
 
@@ -260,6 +265,11 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 			return "";
 		end
 		if ply.pInvites and #ply.pInvites >= 1 then
+			if #ply.pInvites[1].members >= pConfig.maxPartySize then
+				ply:ChatPrint("The party '" .. ply.pInvites[1].name .. "' is full.");
+				table.remove(ply.pInvites, 1);
+				return "";
+			end
 			ply.pInvites[1]:AddPlayer(ply, true);
 			table.remove(ply.pInvites, 1);
 
@@ -270,6 +280,8 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 					end
 				end
 			end
+		else
+			ply:ChatPrint("You have no pending party invites.");
 		end
 	end
 
@@ -279,6 +291,8 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 			ply.pInvites[1].leader:ChatPrint(ply:Nick() .. " declined the party invite.");
 			ply:ChatPrint("You declined the invite to the party '" .. ply.pInvites[1].name .. "'.");
 			table.remove(ply.pInvites, 1);
+		else
+			ply:ChatPrint("You have no pending party invites.");
 		end
 	end
 
@@ -385,11 +399,19 @@ timer.Create("SendPartyInfo", .1, 0, function()
 	end
 end);
 
-player.GetAll()[2]:Say("!pcreate The Mobsters");
-timer.Simple(1, function()
-	player.GetAll()[2]:Say("!pinvite Mob");
+-- DEBUG EXEC
+-- lua_openscript c/p/PParty/lua/init.lua; lua_openscript_cl c/p/PParty/lua/cl_init.lua;
 
-	timer.Simple(5, function()
-		player.GetAll()[2]:Say("!ppromote Mob");
+player.GetAll()[2]:Say("!pcreate cool guys");
+timer.Simple(1, function()
+	player.GetAll()[2]:Say("!pinvite bob");
+	player.GetAll()[2]:Say("!pinvite joh");
+	player.GetAll()[2]:Say("!pinvite jdu");
+	player.GetAll()[2]:Say("!pinvite ang");
+
+	timer.Simple(1, function()
+		player.GetAll()[3]:Say("!paccept");
+		player.GetAll()[4]:Say("!paccept");
+		player.GetAll()[5]:Say("!paccept");
 	end);
 end);
