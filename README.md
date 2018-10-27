@@ -52,9 +52,7 @@ These are settings for each individual party that can be altered by the party's 
 
 # Installation
 
-1. Create a new folder in your `/addons/` directory in your server called `PerfectParty`.
-2. Create a new directory `/lua/autorun/` inside the newly created directory.
-3. Insert the contents of the `/lua/` folder in this directory into the `./autorun/` directory.
+Simply create a new folder in your `/addons/` directory on your server called `PerfectParty` and then drag-and-drop the `/lua/` folder from this repository into the newly made directory.
 
 # Licence
 
