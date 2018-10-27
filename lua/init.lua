@@ -28,7 +28,7 @@ function Party:New(name, creator)
 	self.members = {};
 
 	self.settings = {
-		friendlyFire = true,
+		friendlyFire = false,
 		headIndicator = true
 	};
 
@@ -297,6 +297,48 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 		ply:ChatPrint("You renamed the party to '" .. ply.CurrentParty.name .. "'.");
 	end
 
+	if isCommand(text, "pset") then
+		wasCommand = true;
+		if not ply.CurrentParty then
+			ply:ChatPrint("You are not in a party.");
+			return "";
+		end
+		if not ply.CurrentParty.leader == ply then
+			ply:ChatPrint("You are not the party leader.");
+			return "";
+		end
+
+		local splitted = string.Split(text, " ");
+		if #splitted ~= 3 then
+			ply:ChatPrint("Invalid paramaters given to '!pset'.");
+			return "";
+		end
+
+		local setting = splitted[2]:lower();
+		local value = splitted[3]:lower()
+		if setting == "ff" or setting == "friendlyfire" then
+			if value == "on" then
+				ply.CurrentParty.settings.friendlyFire = true;
+				ply:ChatPrint("Party friendly fire turned ON.");
+			elseif value == "off" then
+				ply.CurrentParty.settings.friendlyFire = false;
+				ply:ChatPrint("Party friendly fire turned OFF.");
+			else
+				ply:ChatPrint("Invalid paramaters given to '!pset'.");
+			end
+		elseif setting == "hi" or setting == "headindicator" then
+			if value == "on" then
+				ply.CurrentParty.settings.headIndicator = true;
+				ply:ChatPrint("Party head indicator turned ON.");
+			elseif value == "off" then
+				ply.CurrentParty.settings.headIndicator = false;
+				ply:ChatPrint("Party head indicator turned OFF.");
+			else
+				ply:ChatPrint("Invalid paramaters given to '!pset'.");
+			end
+		end
+	end
+
 	if (isCommand(text, "pinfo")) then
 		wasCommand = true;
 		if not ply.CurrentParty then
@@ -327,6 +369,7 @@ timer.Create("SendPartyInfo", .1, 0, function()
 			net.Start("PartyInfo");
 				net.WriteString(v.CurrentParty.name);
 				net.WriteTable(v.CurrentParty.members);
+				net.WriteTable(v.CurrentParty.settings);
 			net.Send(v);
 		end
 	end
@@ -334,14 +377,9 @@ end);
 
 player.GetAll()[2]:Say("!pcreate The Mobsters");
 timer.Simple(1, function()
-	-- player.GetAll()[2]:Say("!pdecline");
 	player.GetAll()[2]:Say("!pinvite Mob");
 
-	timer.Simple(1, function()
-		-- player.GetAll()[2]:Say("!ppromote Mob");
-
-		-- timer.Simple(1, function()
-		-- 	player.GetAll()[2]:Say("!pleave");
-		-- end);
+	timer.Simple(5, function()
+		player.GetAll()[2]:Say("!ppromote Mob");
 	end);
 end);

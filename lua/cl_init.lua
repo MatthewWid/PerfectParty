@@ -128,7 +128,8 @@ end
 local CurrentParty = {
 	exists = false,
 	name = nil,
-	members = nil
+	members = nil,
+	settings = nil
 };
 
 hook.Add("HUDPaint", "Draw Party List", function()
@@ -150,15 +151,17 @@ hook.Add("HUDPaint", "Draw Party List", function()
 		for k, v in pairs(CurrentParty.members) do
 			calcPlayerInfo(v, k);
 
-			local posEyes = v:GetAttachment(v:LookupAttachment("eyes")).Pos;
-			if not posEyes then continue; end
-			posEyes = (posEyes + Vector(0, -3, 11));
-			posEyes = posEyes:ToScreen();
-			local size = 24 * 150 / LocalPlayer():GetPos():Distance(v:GetPos());
-			
-			draw.NoTexture();
-			draw.Circle(posEyes.x, posEyes.y, size, Color(73, 221, 73, 180));
-			draw.Circle(posEyes.x, posEyes.y, .6 * size, Color(66, 244, 158, 255));
+			if CurrentParty.settings.headIndicator then
+				local posEyes = v:GetAttachment(v:LookupAttachment("eyes")).Pos;
+				if not posEyes then continue; end
+				posEyes = (posEyes + Vector(0, -3, 11));
+				posEyes = posEyes:ToScreen();
+				local size = 24 * 150 / LocalPlayer():GetPos():Distance(v:GetPos());
+				
+				draw.NoTexture();
+				draw.Circle(posEyes.x, posEyes.y, size, Color(73, 221, 73, 180));
+				draw.Circle(posEyes.x, posEyes.y, .6 * size, Color(66, 244, 158, 255));
+			end
 		end
 	end
 end);
@@ -167,6 +170,7 @@ net.Receive("PartyInfo", function()
 	CurrentParty.exists = true;
 	CurrentParty.name = net.ReadString();
 	CurrentParty.members = net.ReadTable();
+	CurrentParty.settings = net.ReadTable();
 end);
 net.Receive("PartyLeave", function()
 	CurrentParty.exists = false;
