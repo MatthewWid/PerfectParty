@@ -1,4 +1,4 @@
-include("shared.lua");
+include("../shared/shared.lua");
 include ("./util/drawFilledCircle.lua");
 
 surface.CreateFont("NameFont", {

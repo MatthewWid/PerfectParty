@@ -1,4 +1,4 @@
-include("shared.lua");
+include("../shared/shared.lua");
 
 util.AddNetworkString("PartyInfo");
 util.AddNetworkString("PartyLeave");
@@ -20,78 +20,80 @@ function partyDelete(party)
 end
 
 -- Party object definitions --
-local Party = {};
-Party.__index = Party;
-function Party:New(name, creator)
-	self.name = name;
-	self.leader = creator or nil;
-	self.members = {};
+function PartyNew(name, creator)
+	local Party = {};
+	Party.__index = Party;
 
-	self.settings = {
+	Party.name = name;
+	Party.leader = creator or nil;
+	Party.members = {};
+
+	Party.settings = {
 		friendlyFire = false,
 		headIndicator = true
 	};
 
-	table.insert(AllParties, self);
+	table.insert(AllParties, Party);
+
+	function Party:IsParty()
+		return true;
+	end
+	function Party:AddPlayer(ply, notify)
+		table.insert(self.members, ply);
+		ply.CurrentParty = self;
+
+		if (notify) then
+			ply:ChatPrint("You have joined the '" .. self.name .. "' party.");
+		end
+	end
+	function Party:RemovePlayer(ply, notify)
+		for k, v in pairs(self.members) do
+			if (v == ply) then
+				table.remove(self.members, k);
+				ply.CurrentParty = nil;
+				net.Start("PartyLeave");
+				net.Send(ply);
+			end
+		end
+
+		if (notify) then
+			ply:ChatPrint("You have been removed from the party.");
+		end
+	end
+	function Party:PlayerIsMember(ply)
+		for _, v in pairs(self.members) do
+			if (v == ply) then
+				return true;
+			end
+		end
+
+		return false;
+	end
+	function Party:PlayerIsInvited(ply)
+		for _, v in pairs(self.invited) do
+			if (v == ply) then
+				return true;
+			end
+		end
+
+		return false;
+	end
+	function Party:FindMember(pName)
+		for _, v in pairs(self.members) do
+			if (string.find(v:Nick():lower(), pName:lower())) then
+				return v;
+			end
+		end
+
+		return false;
+	end
 
 	if (creator && creator:IsPlayer()) then
-		self:AddPlayer(creator, false);
+		Party:AddPlayer(creator, false);
 		creator:ChatPrint("You created the party '" .. name .. "'.")
 	end
 
-	return self;
-end
-function Party:IsParty()
-	return true;
-end
-function Party:AddPlayer(ply, notify)
-	table.insert(self.members, ply);
-	ply.CurrentParty = self;
-
-	if (notify) then
-		ply:ChatPrint("You have joined the '" .. self.name .. "' party.");
-	end
-end
-function Party:RemovePlayer(ply, notify)
-	for k, v in pairs(self.members) do
-		if (v == ply) then
-			table.remove(self.members, k);
-			ply.CurrentParty = nil;
-			net.Start("PartyLeave");
-			net.Send(ply);
-		end
-	end
-
-	if (notify) then
-		ply:ChatPrint("You have been removed from the party.");
-	end
-end
-function Party:PlayerIsMember(ply)
-	for _, v in pairs(self.members) do
-		if (v == ply) then
-			return true;
-		end
-	end
-
-	return false;
-end
-function Party:PlayerIsInvited(ply)
-	for _, v in pairs(self.invited) do
-		if (v == ply) then
-			return true;
-		end
-	end
-
-	return false;
-end
-function Party:FindMember(pName)
-	for _, v in pairs(self.members) do
-		if (string.find(v:Nick():lower(), pName:lower())) then
-			return v;
-		end
-	end
-
-	return false;
+	return Party;
 end
 
 -- Chat command inputs --
@@ -122,7 +124,7 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 			ply:ChatPrint("You are already in a party.");
 			return "";
 		end
-		Party:New(string.sub(text, 10), ply);
+		PartyNew(string.sub(text, 10), ply);
 	end
 
 	if isCommand(text, "pleave") then
