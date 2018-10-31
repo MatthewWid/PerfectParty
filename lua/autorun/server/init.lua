@@ -221,7 +221,6 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 			PartyInform(ply, {"'" .. pName .. "' is not in your party."});
 			return "";
 		end
-
 		ply.CurrentParty.leader = playerToAdd;
 		PartyInform(ply.CurrentParty.members, {"(", partyCol, ply.CurrentParty.name, textCol, ") ", nameCol, playerToAdd:Nick(), textCol, " has been promoted to the party leader."});
 	end
@@ -399,7 +398,7 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 		PartyInform(ply.CurrentParty.members, {"(", partyCol, ply.CurrentParty.name, textCol, ") ", nameCol, ply:Nick(), textCol, " » ", message});
 	end
 
-	-- pinvites
+	-- pinvited
 
 	-- puninvite
 
@@ -429,15 +428,4 @@ timer.Create("SendPartyInfo", .1, 0, function()
 			net.Send(v);
 		end
 	end
-end);
-
-player.GetAll()[2]:Say("!pcreate lolmeme");
-player.GetAll()[3]:Say("!pcreate the boyz");
-timer.Simple(5, function()
-	-- player.GetAll()[2]:Say("!pdecline");
-	player.GetAll()[2]:Say("!pinvite mob");
-	player.GetAll()[3]:Say("!pinvite mob");
-	timer.Simple(5, function()
-		player.GetAll()[4]:Say("!pdeclineall");
-	end);
 end);
