@@ -317,6 +317,19 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 		end
 	end
 
+	if isCommand(text, "pdeclineall") then
+		wasCommand = true;
+		if ply.pInvites and #ply.pInvites >= 1 then
+			PartyInform(ply, {nameCol, "You", textCol, " declined all of your pending invites."});
+			for _, v in pairs(ply.pInvites) do
+				PartyInform(v.leader, {nameCol, ply:Nick(), textCol, " declined the party invite."});
+			end
+			ply.pInvites = {};
+		else
+			PartyInform(ply, {"You have no pending party invites."});
+		end
+	end
+
 	if isCommand(text, "pname") then
 		wasCommand = true;
 		if not ply.CurrentParty then
@@ -425,6 +438,6 @@ timer.Simple(5, function()
 	player.GetAll()[2]:Say("!pinvite mob");
 	player.GetAll()[3]:Say("!pinvite mob");
 	timer.Simple(5, function()
-		-- player.GetAll()[2]:Say("!pleave");
+		player.GetAll()[4]:Say("!pdeclineall");
 	end);
 end);
