@@ -263,6 +263,29 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 		PartyInform(playerToInvite, {nameCol, "You", textCol, " have been invited by ", nameCol, ply:Nick(), textCol, " to the party ", partyCol, ply.CurrentParty.name, textCol, "."});
 	end
 
+	if isCommand(text, "pinvites") then
+		wasCommand = true;
+		if ply.pInvites and #ply.pInvites >= 1 then
+			local msg = {"Current invites (in order): "};
+
+			for k, v in pairs(ply.pInvites) do
+				if k ~= 1 then
+					table.insert(msg, textCol);
+					table.insert(msg, ", ");
+				end
+				table.insert(msg, partyCol);
+				table.insert(msg, v.name);
+			end
+
+			table.insert(msg, textCol);
+			table.insert(msg, ".");
+
+			PartyInform(ply, msg);
+		else
+			PartyInform(ply, {"You have no pending party invites."});
+		end
+	end
+
 	if isCommand(text, "paccept") then
 		wasCommand = true;
 		if ply.CurrentParty then
@@ -395,10 +418,12 @@ timer.Create("SendPartyInfo", .1, 0, function()
 	end
 end);
 
--- player.GetAll()[2]:Say("!pcreate lolmeme");
-timer.Simple(10, function()
-	player.GetAll()[2]:Say("!pdecline");
-	-- player.GetAll()[2]:Say("!pinvite mob");
+player.GetAll()[2]:Say("!pcreate lolmeme");
+player.GetAll()[3]:Say("!pcreate the boyz");
+timer.Simple(5, function()
+	-- player.GetAll()[2]:Say("!pdecline");
+	player.GetAll()[2]:Say("!pinvite mob");
+	player.GetAll()[3]:Say("!pinvite mob");
 	timer.Simple(5, function()
 		-- player.GetAll()[2]:Say("!pleave");
 	end);
