@@ -1,4 +1,8 @@
 include("../shared/shared.lua");
+local textCol = pConfig.chat.defaultColour;
+local nameCol = pConfig.chat.nameColour;
+local partyCol = pConfig.chat.partyColour;
+local cmdCol = pConfig.chat.commandColour;
 include ("./util/drawFilledCircle.lua");
 
 surface.CreateFont("NameFont", {
@@ -174,4 +178,16 @@ net.Receive("PartyInfo", function()
 end);
 net.Receive("PartyLeave", function()
 	CurrentParty.exists = false;
+end);
+net.Receive("PartyInform", function()
+	chat.AddText(
+		Color(230, 230, 230),
+		"[",
+		pConfig.chat.logoColour,
+		"PParty",
+		Color(230, 230, 230),
+		"] ",
+		textCol,
+		unpack(net.ReadTable())
+	);
 end);

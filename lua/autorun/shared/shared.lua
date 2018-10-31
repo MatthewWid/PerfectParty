@@ -12,5 +12,12 @@ pConfig = {
 		bgDefault = Color(250, 250, 250),
 		statsBg = Color(160, 160, 160),
 		statsDrawText = true
+	},
+	chat = {
+		defaultColour = Color(255, 255, 255),
+		logoColour = Color(220, 0, 0),
+		nameColour = Color(120, 255, 120),
+		partyColour = Color(60, 60, 255),
+		commandColour = Color(200, 200, 200)
 	}
 };

@@ -1,7 +1,12 @@
 include("../shared/shared.lua");
+local textCol = pConfig.chat.defaultColour;
+local nameCol = pConfig.chat.nameColour;
+local partyCol = pConfig.chat.partyColour;
+local cmdCol = pConfig.chat.commandColour;
 
 util.AddNetworkString("PartyInfo");
 util.AddNetworkString("PartyLeave");
+util.AddNetworkString("PartyInform");
 
 -- Initially clear all players' parties if they exist
 for _, v in pairs(player.GetAll()) do
@@ -20,6 +25,13 @@ function partyDelete(party)
 end
 
 -- Party object definitions --
+function PartyInform(plys, message)
+	if not plys then return; end
+
+	net.Start("PartyInform");
+		net.WriteTable(message);
+	net.Send(plys);
+end
 function PartyNew(name, creator)
 	local Party = {};
 	Party.__index = Party;
@@ -43,7 +55,7 @@ function PartyNew(name, creator)
 		ply.CurrentParty = self;
 
 		if (notify) then
-			ply:ChatPrint("You have joined the '" .. self.name .. "' party.");
+			PartyInform(ply, {nameCol, "You", textCol, " have joined the ", partyCol, self.name, textCol, " party."});
 		end
 	end
 	function Party:RemovePlayer(ply, notify)
@@ -57,7 +69,7 @@ function PartyNew(name, creator)
 		end
 
 		if (notify) then
-			ply:ChatPrint("You have been removed from the party.");
+			PartyInform(ply, {nameCol, "You", textCol, " have been removed from the party."});
 		end
 	end
 	function Party:PlayerIsMember(ply)
@@ -90,7 +102,7 @@ function PartyNew(name, creator)
 
 	if (creator && creator:IsPlayer()) then
 		Party:AddPlayer(creator, false);
-		creator:ChatPrint("You created the party '" .. name .. "'.")
+		PartyInform(creator, {nameCol, "You", textCol, " created the party ", partyCol, name, textCol, "."});
 	end
 
 	return Party;
@@ -121,7 +133,7 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 	if isCommand(text, "pcreate") then
 		wasCommand = true;
 		if ply.CurrentParty then
-			ply:ChatPrint("You are already in a party.");
+			PartyInform(ply, {nameCol, "You", textCol, " are already in a party."})
 			return "";
 		end
 		PartyNew(string.sub(text, 10), ply);
@@ -130,45 +142,42 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 	if isCommand(text, "pleave") then
 		wasCommand = true;
 		if not ply.CurrentParty then
-			ply:ChatPrint("You are not in a party.");
+			PartyInform(ply, {nameCol, "You", textCol, " are not in a party."});
 			return "";
 		end
 		if ply.CurrentParty.leader == ply then
-			ply:ChatPrint("You cannot leave a party you are the leader of. Use '!pdisband' to disband your entire party.");
+			PartyInform(ply, {nameCol, "You", textCol, " cannot leave a party you are the leader of. Use ", cmdCol, "!pdisband", textCol, " to disband your entire party."});
 			return "";
 		end
 
-		for _, v in pairs(ply.CurrentParty.members) do
-			v:ChatPrint(ply:Nick() .. " has left the party.");
-		end
+		PartyInform(ply.CurrentParty.members, {"(", partyCol, ply.CurrentParty.name, textCol, ") ", nameCol, ply:Nick(), textCol, " has left the party."});
 		ply.CurrentParty:RemovePlayer(ply, true);
 	end
 
 	if isCommand(text, "pkick") then
 		wasCommand = true;
 		if not ply.CurrentParty then
-			ply:ChatPrint("You are not in a party.");
+			PartyInform(ply, {nameCol, "You", textCol, " are not in a party."});
 			return "";
 		end
 		if not ply.CurrentParty.leader == ply then
-			ply:ChatPrint("You are not the party leader.");
+			PartyInform(ply, {nameCol, "You", textCol, " are not the party leader."});
 			return "";
 		end
 
-		local playerToKick = ply.CurrentParty:FindMember(string.Split(text, " ")[2]);
+		local pName = string.sub(text, 8);
+		local playerToKick = ply.CurrentParty:FindMember(pName);
 		if ply == playerToKick then
-			ply:ChatPrint("You cannot kick yourself.");
+			PartyInform(ply, {nameCol, "You", textCol, " cannot kick yourself."});
 			return "";
 		end
 		if not playerToKick then
-			ply:ChatPrint(pName .. " is not in your party.");
+			PartyInform(ply, {"'" .. pName .. "' is not in your party."});
 			return "";
 		end
 
 		ply.CurrentParty:RemovePlayer(playerToKick, true);
-		for _, v in pairs(ply.CurrentParty.members) do
-			v:ChatPrint(playerToKick:Nick() .. " has been kicked from the party.");
-		end
+		PartyInform(ply.CurrentParty.members, {"(", partyCol, ply.CurrentParty.name, textCol, ") ", nameCol, playerToKick:Nick(), textCol, " has been kicked from the party."});
 		net.Start("PartyLeave");
 		net.Send(playerToKick);
 	end
@@ -176,16 +185,16 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 	if isCommand(text, "pdisband") then
 		wasCommand = true;
 		if not ply.CurrentParty then
-			ply:ChatPrint("You are not in a party.");
+			PartyInform(ply, {nameCol, "You", textCol, " are not in a party."});
 			return "";
 		end
 		if not ply.CurrentParty.leader == ply then
-			ply:ChatPrint("You are not the party leader.");
+			PartyInform(ply, {nameCol, "You", textCol, " are not the party leader."});
 			return "";
 		end
 
+		PartyInform(ply.CurrentParty.members, {"Your party has been disbanded."});
 		for _, v in pairs(ply.CurrentParty.members) do
-			v:ChatPrint("Your party has been disbanded.");
 			if v ~= ply then
 				ply.CurrentParty:RemovePlayer(v);
 			end
@@ -198,40 +207,38 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 	if isCommand(text, "ppromote") then
 		wasCommand = true;
 		if not ply.CurrentParty then
-			ply:ChatPrint("You are not in a party.");
+			PartyInform(ply, {nameCol, "You", textCol, " are not in a party."});
 			return "";
 		end
 		if not ply.CurrentParty.leader == ply then
-			ply:ChatPrint("You are not the party leader.");
+			PartyInform(ply, {nameCol, "You", textCol, " are not the party leader."});
 			return "";
 		end
 
 		local pName = string.sub(text, 11);
-
 		local playerToAdd = ply.CurrentParty:FindMember(pName);
 		if not playerToAdd then
-			ply:ChatPrint(pName .. " is not in your party.");
+			PartyInform(ply, {"'" .. pName .. "' is not in your party."});
 			return "";
 		end
 
 		ply.CurrentParty.leader = playerToAdd;
-		ply:ChatPrint("You have promoted " .. playerToAdd:Nick() .. " to the party leader.");
-		playerToAdd:ChatPrint("You have been promoted to the party leader.");
+		PartyInform(ply.CurrentParty.members, {"(", partyCol, ply.CurrentParty.name, textCol, ") ", nameCol, playerToAdd:Nick(), textCol, " has been promoted to the party leader."});
 	end
 
 	if isCommand(text, "pinvite") then
 		wasCommand = true;
 		if not ply.CurrentParty then
-			ply:ChatPrint("You are not in a party.");
+			PartyInform(ply, {nameCol, "You", textCol, " are not in a party."});
 			return "";
 		end
 		if not ply.CurrentParty.leader == ply then
-			ply:ChatPrint("You are not the party leader.");
+			PartyInform(ply, {nameCol, "You", textCol, " are not the party leader."});
 			return "";
 		end
 
 		if #ply.CurrentParty.members >= pConfig.maxPartySize then
-			ply:ChatPrint("You have reached the maximum party size (" .. pConfig.maxPartySize .. ").");
+			PartyInform(ply, {"You have reached the maximum party size (", cmdCol, pConfig.maxPartySize, textCol, ")."});
 			return "";
 		end
 
@@ -239,15 +246,11 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 		local playerToInvite = findPlayer(pName);
 
 		if not playerToInvite or not playerToInvite:IsPlayer() then
-			ply:ChatPrint("Player '" .. pName .. "' not found.");
+			PartyInform(ply, {"Player '", pName, "' not found."});
 			return "";
 		end
 		if ply.CurrentParty:PlayerIsMember(playerToInvite) then
-			ply:ChatPrint(playerToInvite:Nick() .. " is already in your party.");
-			return "";
-		end
-		if playerToInvite.CurrentParty then
-			ply:ChatPrint(playerToInvite:Nick() .. " is already in a party.");
+			PartyInform(ply, {nameCol, playerToInvite:Nick(), textCol, " is already in your party."});
 			return "";
 		end
 
@@ -256,77 +259,70 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 		else
 			playerToInvite.pInvites = {ply.CurrentParty};
 		end
-		ply:ChatPrint("You invited " .. playerToInvite:Nick() .. " to the party.");
-		playerToInvite:ChatPrint("You have been invited by " .. ply:Nick() .. " to the party '" .. ply.CurrentParty.name .. "'.")
+		PartyInform(ply, {nameCol, "You", textCol, " invited ", nameCol, playerToInvite:Nick(), textCol, " to the party."});
+		PartyInform(playerToInvite, {nameCol, "You", textCol, " have been invited by ", nameCol, ply:Nick(), textCol, " to the party ", partyCol, ply.CurrentParty.name, textCol, "."});
 	end
 
 	if isCommand(text, "paccept") then
 		wasCommand = true;
 		if ply.CurrentParty then
-			ply:ChatPrint("You must first leave your party to join another ('!pleave' or '!pdisband').");
+			PartyInform(ply, {"You must first leave your current party to join a new one (", cmdCol, "!pleave", textCol, " or ", cmdCol, "!pdisband", textCol, ")."});
 			return "";
 		end
 		if ply.pInvites and #ply.pInvites >= 1 then
 			if #ply.pInvites[1].members >= pConfig.maxPartySize then
-				ply:ChatPrint("The party '" .. ply.pInvites[1].name .. "' is full.");
+				PartyInform(ply, {partyCol, ply.pInvites[1].name, textCol, " is full."});
 				table.remove(ply.pInvites, 1);
 				return "";
 			end
+			PartyInform(ply.pInvites[1].members, {"(", partyCol, ply.pInvites[1].name, textCol, ") ", nameCol, ply:Nick(), textCol, " has joined the party."});
 			ply.pInvites[1]:AddPlayer(ply, true);
 			table.remove(ply.pInvites, 1);
-
-			if ply.CurrentParty then
-				for _, v in pairs(ply.CurrentParty.members) do
-					if v ~= ply then
-						v:ChatPrint(ply:Nick() .. " has joined the party.");
-					end
-				end
-			end
 		else
-			ply:ChatPrint("You have no pending party invites.");
+			PartyInform(ply, {"You have no pending party invites."});
 		end
 	end
 
 	if isCommand(text, "pdecline") then
 		wasCommand = true;
 		if ply.pInvites and #ply.pInvites >= 1 then
-			ply.pInvites[1].leader:ChatPrint(ply:Nick() .. " declined the party invite.");
-			ply:ChatPrint("You declined the invite to the party '" .. ply.pInvites[1].name .. "'.");
+			PartyInform(ply, {nameCol, "You", textCol, " declined the invite to ", partyCol, ply.pInvites[1].name, textCol, "."});
+			PartyInform(ply.pInvites[1].leader, {nameCol, ply:Nick(), textCol, " declined the party invite."});
 			table.remove(ply.pInvites, 1);
 		else
-			ply:ChatPrint("You have no pending party invites.");
+			PartyInform(ply, {"You have no pending party invites."});
 		end
 	end
 
 	if isCommand(text, "pname") then
 		wasCommand = true;
 		if not ply.CurrentParty then
-			ply:ChatPrint("You are not in a party.");
+			PartyInform(ply, {nameCol, "You", textCol, " are not in a party."});
 			return "";
 		end
 		if not ply.CurrentParty.leader == ply then
-			ply:ChatPrint("You are not the party leader.");
+			PartyInform(ply, {nameCol, "You", textCol, " are not the party leader."});
 			return "";
 		end
 
 		ply.CurrentParty.name = string.sub(text, 8);
-		ply:ChatPrint("You renamed the party to '" .. ply.CurrentParty.name .. "'.");
+		PartyInform(ply.CurrentParty.members, {"Your party has been renamed to ", partyCol, ply.CurrentParty.name, textCol, "."});
 	end
 
 	if isCommand(text, "pset") then
 		wasCommand = true;
 		if not ply.CurrentParty then
-			ply:ChatPrint("You are not in a party.");
+			PartyInform(ply, {nameCol, "You", textCol, " are not in a party."});
 			return "";
 		end
 		if not ply.CurrentParty.leader == ply then
-			ply:ChatPrint("You are not the party leader.");
+			PartyInform(ply, {nameCol, "You", textCol, " are not the party leader."});
 			return "";
 		end
 
 		local splitted = string.Split(text, " ");
 		if #splitted ~= 3 then
-			ply:ChatPrint("Invalid paramaters given to '!pset'.");
+			PartyInform(ply, {"Invalid paramaters given to ", cmdCol, "!pset", textCol, "."});
 			return "";
 		end
 
@@ -335,45 +331,33 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 		if setting == "ff" or setting == "friendlyfire" then
 			if value == "on" then
 				ply.CurrentParty.settings.friendlyFire = true;
-				ply:ChatPrint("Party friendly fire turned ON.");
+				PartyInform(ply.CurrentParty.members, {"(", partyCol, ply.CurrentParty.name, textCol, ") ", cmdCol, "Friendly fire", textCol, " has been turned ", cmdCol, "ON", textCol, "."});
 			elseif value == "off" then
 				ply.CurrentParty.settings.friendlyFire = false;
-				ply:ChatPrint("Party friendly fire turned OFF.");
+				PartyInform(ply.CurrentParty.members, {"(", partyCol, ply.CurrentParty.name, textCol, ") ", cmdCol, "Friendly fire", textCol, " has been turned ", cmdCol, "OFF", textCol, "."});
 			else
-				ply:ChatPrint("Invalid paramaters given to '!pset'.");
+				PartyInform(ply, {"Invalid paramaters given to ", cmdCol, "!pset", textCol, "."});
 			end
 		elseif setting == "hi" or setting == "headindicator" then
 			if value == "on" then
 				ply.CurrentParty.settings.headIndicator = true;
-				ply:ChatPrint("Party head indicator turned ON.");
+				PartyInform(ply.CurrentParty.members, {"(", partyCol, ply.CurrentParty.name, textCol, ") ", cmdCol, "Head indicators", textCol, " have been turned ", cmdCol, "ON", textCol, "."});
 			elseif value == "off" then
 				ply.CurrentParty.settings.headIndicator = false;
-				ply:ChatPrint("Party head indicator turned OFF.");
+				PartyInform(ply.CurrentParty.members, {"(", partyCol, ply.CurrentParty.name, textCol, ") ", cmdCol, "Head indicators", textCol, " have been turned ", cmdCol, "OFF", textCol, "."});
 			else
-				ply:ChatPrint("Invalid paramaters given to '!pset'.");
+				PartyInform(ply, {"Invalid paramaters given to ", cmdCol, "!pset", textCol, "."});
 			end
 		end
 	end
 
-	if (isCommand(text, "pinfo")) then
-		wasCommand = true;
-		if not ply.CurrentParty then
-			ply:ChatPrint("You are not in a party.");
-			return "";
-		end
+	-- pchat »
 
-		local playerList = "";
-		for k, v in pairs(ply.CurrentParty.members) do
-			playerList = (
-				playerList
-				.. ((v == ply.CurrentParty.leader) and "[Leader] " or "")
-				.. v:Nick()
-				.. ((k ~= #ply.CurrentParty.members) and ", " or "")
-			);
-		end
+	-- pinvites
 
-		ply:ChatPrint("Your party '" .. ply.CurrentParty.name .. "': " .. playerList);
-	end
+	-- puninvite
+
+	-- pdeclineall
 
 	if wasCommand then return ""; end
 end);
