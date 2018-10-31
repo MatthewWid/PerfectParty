@@ -351,7 +351,17 @@ hook.Add("PlayerSay", "Party Commands", function(ply, text)
 		end
 	end
 
-	-- pchat »
+	local longChat = isCommand(text, "pchat");
+	if longChat or isCommand(text, "pc") then
+		wasCommand = true;
+		if not ply.CurrentParty then
+			PartyInform(ply, {nameCol, "You", textCol, " are not in a party."});
+			return "";
+		end
+
+		local message = longChat and string.sub(text, 8) or string.sub(text, 5);
+		PartyInform(ply.CurrentParty.members, {"(", partyCol, ply.CurrentParty.name, textCol, ") ", nameCol, ply:Nick(), textCol, " » ", message});
+	end
 
 	-- pinvites
 
@@ -383,4 +393,13 @@ timer.Create("SendPartyInfo", .1, 0, function()
 			net.Send(v);
 		end
 	end
+end);
+
+-- player.GetAll()[2]:Say("!pcreate lolmeme");
+timer.Simple(10, function()
+	player.GetAll()[2]:Say("!pdecline");
+	-- player.GetAll()[2]:Say("!pinvite mob");
+	timer.Simple(5, function()
+		-- player.GetAll()[2]:Say("!pleave");
+	end);
 end);
