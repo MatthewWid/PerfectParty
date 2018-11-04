@@ -25,6 +25,11 @@ The configuration settings are stored in the `pConfig` variable in `/lua/shared.
 | `bgDefault` | `Color(250, 250, 250)` | Background colour of each players' information box.<br>This changes to `Color(255, 160, 160)` when the player is dead. |
 | `statsBg` | `Color(160, 160, 160)` | Background colour of the bar *behind* the players' health and armour statbar. |
 | `statsDrawText` | `true` | Display the actual value of the players' health and armour as text over their respective statsbar. |
+| `defaultColour` | `Color(255, 255, 255)` | Default chat colour that should be used if no special one is being applied. |
+| `logoColour` | `Color(220, 0, 0)` | Colour of the `[PParty]` logo that is prepended to all party chat messages. |
+| `nameColour` | `Color(120, 255, 120)` | Highlight colour of player names in chat. |
+| `partyColour` | `Color(60, 60, 255)` | Highlight colour of party names in chat. |
+| `commandColour` | `Color(200, 200, 200)` | Highlight colour of command names and parameters in chat. |
 
 # Chat Commands
 
@@ -36,7 +41,10 @@ The configuration settings are stored in the `pConfig` variable in `/lua/shared.
 | `pinvite` | `<Player Name>` | **Yes** | Sends a party invite to another player. | `!pinvite Freddy101` |
 | `paccept` | | No | Accepts the last sent party invitation.<br>(Invitations are queued. You can accept and decline in the order of receiving invitations). | `!paccept` |
 | `pdecline` | | No | Declines the last sent party invitation. | `!pdecline` |
+| `pdeclineall` | | No | Declines all currently pending invitations. | `!pdeclineall` |
+| `pinvites` | | No | Lists all currently pending invitations in the order of receiving them. | `!pinvites` |
 | `pleave` | | No | Leaves the currently joined party. Party leaders cannot directly leave. | `!pleave` |
+| `pchat` OR `pc` | `<Message Text>` | Sends a chat message to everyone in the currently joined party. | `!pchat Hi everyone!` |
 | `pkick` | `<Player Name>` | **Yes** | Kicks a target player from the party. | `!pkick Freddy101` |
 | `pinfo` | | No | Provides information in chat about your party name and its member list. | `!pinfo` |
 | `pset` | `<Setting Name> <Setting Value>` | **Yes** | Sets the value of a party setting for your party.<br>See the *Party Settings* section. | `!pset ff on` |
