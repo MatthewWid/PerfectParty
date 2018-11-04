@@ -12,7 +12,7 @@ Below is information about the **configuration**, **chat commands**, **party set
 The configuration settings are stored in the `pConfig` variable in `/lua/shared.lua`.
 
 | Settings Name | Default Value | Description |
-|-|-|-|
+|-|:-:|-|
 | `prefix` | `!` | Prefix for chat commands. See the *Chat Commands* section. |
 | `maxPartySize` | `4` | Maximum amount of players allowed in any one party. |
 | `listBackground` | `true` | On-screen party list dark background. |
