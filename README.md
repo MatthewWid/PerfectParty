@@ -44,7 +44,7 @@ The configuration settings are stored in the `pConfig` variable in `/lua/shared.
 | `pdeclineall` | | No | Declines all currently pending invitations. | `!pdeclineall` |
 | `pinvites` | | No | Lists all currently pending invitations in the order of receiving them. | `!pinvites` |
 | `pleave` | | No | Leaves the currently joined party. Party leaders cannot directly leave. | `!pleave` |
-| `pchat` OR `pc` | `<Message Text>` | Sends a chat message to everyone in the currently joined party. | `!pchat Hi everyone!` |
+| `pchat` OR `pc` | `<Message Text>` | No | Sends a chat message to everyone in the currently joined party. | `!pchat Hi everyone!` |
 | `pkick` | `<Player Name>` | **Yes** | Kicks a target player from the party. | `!pkick Freddy101` |
 | `pinfo` | | No | Provides information in chat about your party name and its member list. | `!pinfo` |
 | `pset` | `<Setting Name> <Setting Value>` | **Yes** | Sets the value of a party setting for your party.<br>See the *Party Settings* section. | `!pset ff on` |
